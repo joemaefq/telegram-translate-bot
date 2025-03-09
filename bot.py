@@ -1,8 +1,7 @@
 import logging
 from googletrans import Translator
 from telegram import Update
-from telegram.ext import Application, MessageHandler, filters, CommandHandler
-from telegram.ext import CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
 # Enable logging to monitor the bot's activity
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
