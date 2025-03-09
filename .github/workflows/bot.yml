@@ -1,29 +1,32 @@
-name: Telegram Bot Deployment
+name: Deploy Translation Bot to Render
 
 on:
   push:
     branches:
-      - main
+      - main  # This triggers the workflow on push to the 'main' branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  # Set Python version you want to use
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt  # Install dependencies from requirements.txt
 
-      - name: Run the bot
-        run: python bot.py
-        env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}  # Set this in GitHub Secrets
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}  # Set this in GitHub Secrets
+    - name: Deploy to Render
+      run: |
+        # Authenticate Render API (you'll need Render's API key)
+        curl -X POST -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -d '{"service_id": "your-render-service-id"}' \
+          https://api.render.com/v1/services/deploy
