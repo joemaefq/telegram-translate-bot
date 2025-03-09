@@ -24,12 +24,15 @@ def translate_message(update: Update, context):
     if user_language != 'en':
         # Translate to English
         translated = translator.translate(original_message, src=user_language, dest='en')
-        # Send translated message below the original
-        update.message.reply_text(f"Original: {original_message}\n\nTranslated (to English): {translated.text}")
+        # Edit the original message to append the translation
+        translated_text = f"\n\nTranslated (to English): {translated.text}"
+        update.message.edit_text(original_message + translated_text)
     else:
         # If it's already in English, translate back to the original language (or any other language)
         translated = translator.translate(original_message, src='en', dest=user_language)
-        update.message.reply_text(f"Original: {original_message}\n\nTranslated (to {user_language}): {translated.text}")
+        # Edit the original message to append the translation
+        translated_text = f"\n\nTranslated (to {user_language}): {translated.text}"
+        update.message.edit_text(original_message + translated_text)
 
 def main():
     updater = Updater(API_TOKEN, use_context=True)
