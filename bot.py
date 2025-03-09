@@ -1,53 +1,56 @@
-import logging
+import os
 from googletrans import Translator
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# Enable logging to monitor the bot's activity
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Set the language based on the system's country setting (you can replace with custom logic)
+import locale
+user_locale = locale.getdefaultlocale()[0]
 
-# Initialize the Translator object
+# Initialize Translator
 translator = Translator()
 
-# Define the translation function
-def translate_text(text: str, dest_lang='en'):
-    # Translate the text into the destination language (English by default)
-    translated = translator.translate(text, dest=dest_lang)
-    return translated.text
+# Define your translation function
+def translate_text(text: str, target_lang: str) -> str:
+    try:
+        translated = translator.translate(text, dest=target_lang)
+        return translated.text
+    except Exception as e:
+        return f"Error in translation: {e}"
 
-# Handle incoming messages and translate them
-async def translate_message(update: Update, context: CallbackContext) -> None:
-    # Get the message text
-    original_message = update.message.text
+# Define a function to handle messages
+def handle_message(update: Update, context: CallbackContext) -> None:
+    original_text = update.message.text
+    target_lang = 'en'  # Default target language
+    # Here we can detect the user's language or derive it from locale
+    if user_locale != 'en_US':
+        target_lang = user_locale.split('_')[0]
+
+    translated_text = translate_text(original_text, target_lang)
     
-    # Translate the message
-    translated_message = translate_text(original_message)
-    
-    # Append the translation in the same message
-    translated_text = f"\n\n[Translated]: {translated_message}"
-    
-    # Edit the original message to append the translation
-    await update.message.reply_text(f"{original_message}{translated_text}")
+    # Send translated message under the original message
+    update.message.reply_text(f"{original_text}\n\nTranslated: {translated_text}")
 
-# Start the bot
-async def start(update: Update, context: CallbackContext) -> None:
-    await update.message.reply_text("I will translate all your messages. Send a message and I will translate it.")
+# Define a start command
+def start(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text("Hello! I am your translation bot. Send any message to translate.")
 
-# Main function to run the bot
-async def main() -> None:
-    """Start the bot."""
-    # Create the Application and use your bot's token here
-    application = Application.builder().token("8153206681:AAGLzg5J9Z9OeoFpfCkK0-Vgsra10tR4EZo").build()
+def main():
+    # Replace '8153206681:AAGLzg5J9Z9OeoFpfCkK0-Vgsra10tR4EZo' with your bot's API token
+    updater = Updater('YOUR-BOT-TOKEN')
 
-    # Register the handlers
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, translate_message))
+    # Get the dispatcher to register handlers
+    dispatcher = updater.dispatcher
 
-    # Run the bot
-    await application.run_polling()
+    # Register commands and message handlers
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+
+    # Start the Bot
+    updater.start_polling()
+
+    # Run the bot until you send a stop signal (Ctrl+C)
+    updater.idle()
 
 if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
+    main()
