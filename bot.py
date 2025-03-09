@@ -1,11 +1,10 @@
-import os
 import logging
-from google.cloud import translate_v2 as translate
+from googletrans import Translator  # Using googletrans for translation
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
-# Initialize Google Translate Client
-translate_client = translate.Client()
+# Initialize Google Translate client using googletrans
+translator = Translator()
 
 # Telegram Bot Token (replace with your own token)
 TELEGRAM_TOKEN = AAGLzg5J9Z9OeoFpfCkK0-Vgsra10tR4EZo
@@ -17,15 +16,15 @@ logger = logging.getLogger(__name__)
 
 # Function to handle incoming messages
 def translate_message(text, target_language='en'):
-    result = translate_client.translate(text, target_lang=target_language)
-    return result['translatedText']
+    result = translator.translate(text, dest=target_language)
+    return result.text  # Return translated text
 
 # Function to start the bot
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text("Hello! Send me any message, and I'll translate it for you!")
+async def start(update: Update, context: CallbackContext) -> None:
+    await update.message.reply_text("Hello! Send me any message, and I'll translate it for you!")
 
 # Function to handle the messages
-def handle_message(update: Update, context: CallbackContext) -> None:
+async def handle_message(update: Update, context: CallbackContext) -> None:
     text = update.message.text  # Original text
     language_code = 'en' if update.message.from_user.language_code != 'en' else 'auto'  # Check if translation is needed
     
@@ -33,24 +32,21 @@ def handle_message(update: Update, context: CallbackContext) -> None:
     translated_text = translate_message(text, target_language=language_code)
     
     # Send back the translated message
-    update.message.reply_text(translated_text)
+    await update.message.reply_text(translated_text)
 
 def main():
     """Start the bot."""
-    updater = Updater(TELEGRAM_TOKEN)
-    
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
+    # Create the Application object (which replaced the Updater class)
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
     
     # Add command handlers
-    dispatcher.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("start", start))
     
-    # Add message handler
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+    # Add message handler (for handling text messages)
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
-    # Start the Bot
-    updater.start_polling()
-    updater.idle()
+    # Start the bot
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
