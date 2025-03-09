@@ -1,8 +1,7 @@
-version: '3'
-services:
-  bot:
-    build: .
-    command: python bot.py
-    environment:
-      - TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_API_TOKEN
-    restart: always
+import yaml
+
+with open("bot.yml", "r") as f:
+    config = yaml.safe_load(f)
+    
+bot_token = config['bot_token']
+default_language = config['default_language']
