@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from googletrans import Translator
 
-API_TOKEN = AAGLzg5J9Z9OeoFpfCkK0-Vgsra10tR4EZo
+API_TOKEN = AAGLzg5J9Z9OeoFpfCkK0-Vgsra10tR4EZo  # Replace with your bot's API token
 
 # Initialize the translator
 translator = Translator()
