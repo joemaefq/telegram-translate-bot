@@ -1,3 +1,3 @@
-python-telegram-bot==20.1  # Or latest 20.x version
-googletrans==4.0.0-rc1  # Translation library
-httpx==0.23.3  # Required for python-telegram-bot 20+
+python-telegram-bot==20.1
+googletrans==3.1.0a0
+httpx==0.23.3
