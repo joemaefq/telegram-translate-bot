@@ -1,14 +1,16 @@
-from google_trans_new import google_translator  # Use google-trans-new package for translation
+from translate import Translator
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
 
 # Initialize Translator
-translator = google_translator()
+def get_translator(target_lang):
+    return Translator(to_lang=target_lang)
 
 # Define the translation function
 def translate_text(text: str, target_lang: str) -> str:
     try:
-        translated = translator.translate(text, lang_tgt=target_lang)
+        translator = get_translator(target_lang)
+        translated = translator.translate(text)
         return translated
     except Exception as e:
         return f"Error in translation: {e}"
